@@ -24,7 +24,6 @@
 namespace CrEOF\Spatial\PHP\Types;
 
 use CrEOF\Spatial\Exception\InvalidValueException;
-use CrEOF\Spatial\PHP\Types\Geometry\GeometryInterface;
 
 /**
  * Abstract geometry object for spatial types
@@ -34,6 +33,15 @@ use CrEOF\Spatial\PHP\Types\Geometry\GeometryInterface;
  */
 abstract class AbstractGeometry implements GeometryInterface
 {
+    const GEOMETRY           = 'Geometry';
+    const POINT              = 'Point';
+    const LINESTRING         = 'LineString';
+    const POLYGON            = 'Polygon';
+    const MULTIPOINT         = 'MultiPoint';
+    const MULTILINESTRING    = 'MultiLineString';
+    const MULTIPOLYGON       = 'MultiPolygon';
+    const GEOMETRYCOLLECTION = 'GeometryCollection';
+    
     /**
      * @var int
      */
@@ -165,6 +173,20 @@ abstract class AbstractGeometry implements GeometryInterface
 
         return $rings;
     }
+    
+    /**
+     * 
+     * @param array $rings
+     * @return array
+     */
+        protected function validateMultiPolygonValue(array $polygons)
+    {
+        foreach ($polygons as &$polygon) {
+            $polygon = $this->validatePolygonValue($polygon);
+        }
+
+        return $polygons;
+    }
 
     /**
      * @param AbstractLineString[] $lineStrings
@@ -250,5 +272,22 @@ abstract class AbstractGeometry implements GeometryInterface
     private function toStringPolygon(array $polygon)
     {
         return $this->toStringMultiLineString($polygon);
+    }
+    
+    /**
+     * @param array[] $polygon
+     *
+     * @return string
+     */
+    private function toStringMultiPolygon(array $polygons)
+    {
+        
+         $strings = null;
+
+        foreach ($polygons as $polygon) {
+            $strings[] = '(' . $this->toStringPolygon($polygon) . ')';
+        }
+
+        return implode(',', $strings);
     }
 }
